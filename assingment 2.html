@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <title>Crime Stats</title>
+
+    <!--https://data.gov.sg/api/action/datastore_search?resource_id=83c21090-bd19-4b54-ab6b-d999c251edcf-->
+    <style>
+        .bar {
+            fill: goldenrod
+        }
+
+        .tooltip {
+            position: absolute;
+            text-align: center;
+            width: 60px;
+            height: 12px;
+            padding: 8px;
+            margin-top: -20px;
+            font: 10px sans-serif;
+            background: #ddd;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <svg>
+        <script>
+            let crimedata = []
+            var margin = { top: 30, right: 30, bottom: 70, left: 90 },
+                width = 1100 - margin.left - margin.right,
+                height = 600 - margin.top - margin.bottom;
+
+            var svg = d3.select("svg")
+                .attr("viewBox", `0 50 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            var xScale = d3.scaleBand()
+                .range([0, width])
+                .padding(0.2);
+            var yScale = d3.scaleLinear()
+                .range([height, 0]);
+
+            var g = svg.append("g")
+                .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+
+            fetch("https://data.gov.sg/api/action/datastore_search?resource_id=83c21090-bd19-4b54-ab6b-d999c251edcf")
+                .then(response => response.json())
+                .then(function (data) {
+
+                    crimedata = data.result.records.filter(crimedata => crimedata.year == "2020")
+                    console.log(crimedata)
+                    createchart(crimedata)
+
+                });
+
+            function createchart(crimedata) {
+
+                xScale.domain(crimedata.map(function (d) { return d.level_2; }))
+                yScale.domain([0, Math.max(...crimedata.map(d => d.value))]);
+
+                g.append("g")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(d3.axisBottom(xScale))
+                    .selectAll("text")
+                    .style("text-anchor", "middle")
+
+
+                g.append("g")
+                    .call(d3.axisLeft(yScale).tickFormat(function (d) {
+                        return d;
+                    }).ticks(20))
+                    .append("text")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", 6)
+                    .attr("dy", "-5.1em")
+                    .attr("text-anchor", "end")
+                    .attr("stroke", "Blue")
+                    .text("Crime Numbers");
+
+                g.selectAll(".bar")
+                    .data(crimedata)
+                    .enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("x", function (d) { return xScale(d.level_2); })
+                    .attr("y", function (d) { return yScale(d.value); })
+                    .attr("width", xScale.bandwidth())
+                    .on("mouseover", d => mouseover(d))
+                    .on("mousemove", mousemove)
+                    .on("mouseout", mouseout)
+                    .attr("height", function (d) { return height - yScale(d.value); });
+
+                var div = d3.select("body").append("div")
+                    .attr("class", "tooltip")
+                    .style("display", "none");
+                function mouseover(d) {
+                    div.style("display", "inline");
+                    div.text(d.value)
+                }
+
+                function mousemove() {
+                    div
+                        .style("left", (d3.event.pageX - 34) + "px")
+                        .style("top", (d3.event.pageY - 12) + "px");
+                }
+
+                function mouseout() {
+                    div.style("display", "none");
+                }
+            }
+
+
+
+        </script>
+    </svg>
+</body>
+
+
+</html>
