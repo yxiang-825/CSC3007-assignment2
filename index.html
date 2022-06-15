@@ -33,12 +33,12 @@
     <svg>
         <script>
             let crimedata = []
-            var margin = { top: 30, right: 30, bottom: 70, left: 90 },
-                width = 1100 - margin.left - margin.right,
-                height = 600 - margin.top - margin.bottom;
+            var margin = { top: 30, right: 120, bottom: 70, left: 100 },
+                width = 1000 - margin.left - margin.right,
+                height = 800 - margin.top - margin.bottom;
 
             var svg = d3.select("svg")
-                .attr("viewBox", `0 50 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+                .attr("viewBox", `0 20 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
             var xScale = d3.scaleBand()
@@ -48,7 +48,7 @@
                 .range([height, 0]);
 
             var g = svg.append("g")
-                .attr("transform", "translate(" + 100 + "," + 100 + ")");
+                .attr("transform", "translate(" + 60 + "," + 100 + ")");
 
 
             fetch("https://data.gov.sg/api/action/datastore_search?resource_id=83c21090-bd19-4b54-ab6b-d999c251edcf")
@@ -71,6 +71,10 @@
                     .call(d3.axisBottom(xScale))
                     .selectAll("text")
                     .style("text-anchor", "middle")
+                    
+                    
+                    
+                    
 
 
                 g.append("g")
